@@ -2,39 +2,39 @@
  * Created by Shane on 14/07/2017.
  */
 // Libraries/Includes
-var Knwl = require('knwl.js')
-var cheerio = require('cheerio')
-var http = require('http')
-var request = require('request')
-var fs = require('fs')
+var Knwl = require('knwl.js');
+var cheerio = require('cheerio');
+var http = require('http');
+var request = require('request');
+var fs = require('fs');
 
 // Variables
-var inputEmail = process.argv[2]        // Input email is taken from commandline arguments
-var domain                              // Domain take from email address
-var knwlInstance = new Knwl('english')  // Knwl instance for using Knwl functions
-var siteDir                             // Folder directory of the site where data is to be stored
-var words                               // All words on website scraped by Knwl
-var bodyG                               // Global body variable
-var finalEmails = []                    // Final processed emails
-var finalPhoneNumbers = []              // Final processed phonenumbers
-var scrapeObj = {}                      // Final object storing scraped data
-var homePageTitle                       // Title of home page
-var hyperLinks = []                     // Array of hyperlinks on the domain
+var inputEmail = process.argv[2];        // Input email is taken from commandline arguments
+var domain;                              // Domain take from email address
+var knwlInstance = new Knwl('english');  // Knwl instance for using Knwl functions
+var siteDir;                             // Folder directory of the site where data is to be stored
+var words;                               // All words on website scraped by Knwl
+var bodyG;                               // Global body variable
+var finalEmails = [];                    // Final processed emails
+var finalPhoneNumbers = [];              // Final processed phonenumbers
+var scrapeObj = {};                      // Final object storing scraped data
+var homePageTitle;                       // Title of home page
+var hyperLinks = [];                     // Array of hyperlinks on the domain
 
 //Load Knwl plugins
-knwlInstance.register('emails', require('knwl.js/default_plugins/emails'))
-knwlInstance.register('internationalPhones', require('knwl.js/experimental_plugins/internationalPhones'))
-knwlInstance.register('places', require('knwl.js/default_plugins/places'))
+knwlInstance.register('emails', require('knwl.js/default_plugins/emails'));
+knwlInstance.register('internationalPhones', require('knwl.js/experimental_plugins/internationalPhones'));
+knwlInstance.register('places', require('knwl.js/default_plugins/places'));
 
 /**
  * Uses commandline arguments to grab domain from email
  */
 if (process.argv[2] != null) {
-    domain = grabDomain(inputEmail)
+    domain = grabDomain(inputEmail);
 }
 else {
-    console.log('Missing email arguments please refer to README.MD')
-    process.exit()
+    console.log('Missing email arguments please refer to README.MD');
+    process.exit();
 }
 
 /**
@@ -49,18 +49,18 @@ else {
  *
  * @type {Promise}
  */
-var body = makeRequest() //sets the first promise in the sequence
+var body = makeRequest(); //sets the first promise in the sequence
 body.then(function (body) {
-    words = getWords(body)
-    bodyG = body
-    return loadToCheerio(body)
+    words = getWords(body);
+    bodyG = body;
+    return loadToCheerio(body);
 }).then(function ($) {
-    homePageTitle = $('title').text()
-    return findHyperLinks($)
+    homePageTitle = $('title').text();
+    return findHyperLinks($);
 }).then(function (links) {
-    findPhoneNumber(links)
-    findEmails(bodyG)
-    hyperLinks = links
+    findPhoneNumber(links);
+    findEmails(bodyG);
+    hyperLinks = links;
 }).then(function () {
     scrapeObj = {
         'website': domain,
@@ -68,17 +68,17 @@ body.then(function (body) {
         'homepageName': homePageTitle,
         'emails': finalEmails,
         'telephone': finalPhoneNumbers,
-    }
-    var json = JSON.stringify(scrapeObj, null, 4)
-    var domainS = domain.split('.')[0] // Take away the domain suffix, so domain name can be used as filename
-    fs.writeFile(siteDir + domainS + '.json', json, 'utf8')
+    };
+    var json = JSON.stringify(scrapeObj, null, 4);
+    var domainS = domain.split('.')[0]; // Take away the domain suffix, so domain name can be used as filename
+    fs.writeFile(siteDir + domainS + '.json', json, 'utf8');
     console.dir(scrapeObj, { // Display json in console
         depth: null,
         colors: true,
-    })
+    });
 }).catch(function (error) {
-    console.log(error)
-})
+    console.log(error);
+});
 
 /**
  * Grabs the domain part of any given email by splitting it at the "@" symbol
@@ -88,12 +88,12 @@ body.then(function (body) {
  * @returns {*} - Domain
  */
 function grabDomain (ie) {
-    domain = ie.split('@')[1]
-    siteDir = './scraped sites/' + domain + '/'
+    domain = ie.split('@')[1];
+    siteDir = './scraped sites/' + domain + '/';
     if (!fs.existsSync(siteDir)) {
-        fs.mkdirSync(siteDir)
+        fs.mkdirSync(siteDir);
     }
-    return domain
+    return domain;
 }
 
 /**
@@ -108,25 +108,25 @@ function makeRequest () {
         request({
             'rejectUnauthorized': false,
             'url': 'http://www.' + grabDomain(inputEmail),
-            'method': 'GET'
+            'method': 'GET',
         }, function (error, response, body) {
             if (!error) {
                 if (response.statusCode === 200) {
-                    console.log('StatusCode OK')
-                    resolve(body)
+                    console.log('StatusCode OK');
+                    resolve(body);
                 }
                 else {
-                    console.log('Bad response code: ' + response.statusCode)
-                    reject(response.statusCode)
+                    console.log('Bad response code: ' + response.statusCode);
+                    reject(response.statusCode);
                 }
             }
             else {
-                console.log(error)
-                console.log('Unable to scrape given domain, exiting program (see error above)')
-                process.exit()
+                console.log(error);
+                console.log('Unable to scrape given domain, exiting program (see error above)');
+                process.exit();
             }
-        })
-    })
+        });
+    });
 }
 
 /**
@@ -143,9 +143,9 @@ function loadToCheerio (body) {
             xmlMode: true,
             decodeEntities: true,
             withDomLvl1: true,
-        })
-        resolve($)
-    })
+        });
+        resolve($);
+    });
 }
 
 /**
@@ -158,10 +158,10 @@ function loadToCheerio (body) {
 function checkDuplicate (entry, array) {
     for (var i = 0; i < array.length; i++) {
         if (array[i] == entry) {
-            return true
+            return true;
         }
     }
-    return false
+    return false;
 }
 
 /**
@@ -177,26 +177,26 @@ function findPhoneNumber (links) {
     // console.log(links);
     links.forEach(function (link) { // Method 1
         if (link.indexOf('tel:') !== -1) {
-            link = link.split(':')[1]
-            link = link.replace(/\s/g, '')
+            link = link.split(':')[1];
+            link = link.replace(/\s/g, '');
             if (link.charAt(0) == 0) {
-                link = link.replace(link.charAt(0), '+44')
+                link = link.replace(link.charAt(0), '+44');
             }
             if (link.length > 5) {
                 if (!checkDuplicate(link, finalPhoneNumbers)) {
-                    finalPhoneNumbers.push(link)
+                    finalPhoneNumbers.push(link);
                 }
             }
         }
-    })
-    var phones = knwlInstance.get('internationalPhones') // Method 2
+    });
+    var phones = knwlInstance.get('internationalPhones'); // Method 2
     phones.forEach(function (phone) {
         if (phone) {
             if (!checkDuplicate(phone['number'], finalPhoneNumbers)) {
-                finalPhoneNumbers.push(phone['number'])
+                finalPhoneNumbers.push(phone['number']);
             }
         }
-    })
+    });
 }
 
 /**
@@ -205,20 +205,20 @@ function findPhoneNumber (links) {
  * @returns {boolean} - True if emails are found, false if not
  */
 function findEmails () {
-    var emails = knwlInstance.get('emails')
-    var anyEmails = false
+    var emails = knwlInstance.get('emails');
+    var anyEmails = false;
     emails.forEach(function (email) {
         if (email) {
             if (!checkDuplicate(email['address'], finalEmails)) {
-                finalEmails.push(email['address'])
+                finalEmails.push(email['address']);
             }
-            anyEmails = true
+            anyEmails = true;
         }
-    })
+    });
     if (anyEmails)
-        return true
+        return true;
     else
-        return false
+        return false;
 }
 
 /**
@@ -230,13 +230,13 @@ function findEmails () {
  */
 function findHyperLinks ($) {
     return new Promise(function (resolve, reject) {
-        anchors = $('a') //Grabs the anchors from cheerio
-        links = []
+        anchors = $('a'); //Grabs the anchors from cheerio
+        links = [];
         $(anchors).each(function (i, anchor) { //For each anchor on the website grab the href.
-            links.push($(anchor).attr('href'))
-        })
-        resolve(links)
-    })
+            links.push($(anchor).attr('href'));
+        });
+        resolve(links);
+    });
 }
 
 /**
@@ -245,6 +245,6 @@ function findHyperLinks ($) {
  * @param body - The HTML body returned from the original request
  */
 function getWords (body) {
-    knwlInstance.init(body)
-    return (knwlInstance.words.get('linkWordsCasesensitive'))
+    knwlInstance.init(body);
+    return (knwlInstance.words.get('linkWordsCasesensitive'));
 }
