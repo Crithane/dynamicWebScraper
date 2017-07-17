@@ -62,6 +62,7 @@ else {
  */
 var body = makeRequest(); //sets the first promise in the sequence
 body.then(function (body) {
+    createDir();
     words = getWords(body);
     bodyG = body;
     return loadToCheerio(body);
@@ -94,7 +95,8 @@ body.then(function (body) {
         colors: true,
     });
 }).catch(function (error) {
-    console.log(error);
+//    console.log(error);
+
 });
 
 /**
@@ -106,11 +108,19 @@ body.then(function (body) {
  */
 function grabDomain (ie) {
     domain = ie.split('@')[1];
+    return domain;
+}
+
+/**
+ * Simple function that creates a directory, for each domain, where the scraped
+ * data is stored. A check is done to make sure the directory doesn't already
+ * exist before creation.
+ */
+function createDir() {
     siteDir = './scraped sites/' + domain + '/';
     if (!fs.existsSync(siteDir)) {
         fs.mkdirSync(siteDir);
     }
-    return domain;
 }
 
 /**
@@ -303,7 +313,6 @@ function findOnGoogleMaps (domain) {
  * To-Do list
  * - Add web app code
  * - Add code to send data to Node web app using AJAX and JSON
- * - Stop the app from creating folders if an error is returned from the original request.
  * - Minor tidying
  */
 
