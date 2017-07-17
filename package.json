@@ -9,8 +9,8 @@
   "author": "Shane Critchley-Kenyon",
   "license": "ISC",
   "dependencies": {
+    "@google/maps": "^0.4.2",
     "cheerio": "cheeriojs/cheerio",
-    "image-downloader": "^3.2.2",
     "jquery": "latest",
     "knwl.js": "loadfive/Knwl.js",
     "request": "request/request",

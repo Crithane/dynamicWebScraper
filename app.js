@@ -10,7 +10,6 @@ var fs = require('fs');
 var googleMapsClient = require('@google/maps').createClient({
     key: 'AIzaSyCxhu3CZLL6FGnXnQrpI3CKJqxJ9SK-XxM'
 });
-const download = require('image-downloader');
 
 // Variables
 var inputEmail = process.argv[2];        // Input email is taken from commandline arguments
