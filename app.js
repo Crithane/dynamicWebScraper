@@ -299,3 +299,11 @@ function findOnGoogleMaps (domain) {
     });
 }
 
+/**
+ * To-Do list
+ * - Add web app code
+ * - Add code to send data to Node web app using AJAX and JSON
+ * - Stop the app from creating folders if an error is returned from the original request.
+ * - Minor tidying
+ */
+
