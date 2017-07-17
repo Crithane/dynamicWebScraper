@@ -14,18 +14,55 @@ var inputEmail = process.argv[2]; // Input email is taken from commandline argum
 var domain;
 var knwlInstance = new Knwl('english');
 var siteDir;
-var finalPhoneNumbers = [];
 var words;
 // var phoneNumberRegex = /^(((\+44)? ?(\(0\))? ?)|(0))( ?[0-9]{3,4}){3}$/
 var postCodeRegex = /^['|"]{0,1}[A-Za-z]{1,2}[0-9]{1,2}[ \n]{0,1}[\n ]{0,1}?[0-9][A-Za-z]{2}['|"]{0,1}$/
-var bodyG;
-var finalEmails = [];
-var scrapeObj = {}
+var bodyG; //Global body variable
+var finalEmails = []; //Final processed emails
+var finalPhoneNumbers = []; //Final processed phonenumbers
+var scrapeObj = {} //Final object storing scraped data
+var homePageTitle; //Title of home page
+
 
 //Load Knwl plugins
 knwlInstance.register('emails', require('knwl.js/default_plugins/emails'));
 knwlInstance.register('internationalPhones', require('knwl.js/experimental_plugins/internationalPhones'));
 knwlInstance.register('places', require('knwl.js/default_plugins/places'));
+
+//Checks if user inputted an email address in arguments
+if(process.argv[2] != null) {
+	domain = grabDomain(inputEmail); //Will process the email domain only if an email is given
+}else{
+	console.log("Missing email arguments please refer to README.MD");
+	process.exit(); //Stops the program due to lack of email address in arguments
+}
+
+//Main Promise sequence
+var body = makeRequest(); //sets the first promise in the sequence
+body.then(function(body) { // executes first promise returning body (HTML body)
+	words = getWords(body); // Uses getWords() to grab all the words from the body
+	bodyG = body; // Saves the body as a global variable
+	return loadToCheerio(body); //Loads the next promise
+}).then(function($) { // Uses the loadToCheerio() function to load the body into the cheerio api
+	homePageTitle = $('title').text(); //Save HTML title to variable
+	return findHyperLinks($); //Loads the next promise
+}).then(function(links){ //Executes findHyperLinks() returning all HREF's as links[]
+	findPhoneNumber(links); //sends links[] to findphonenumber
+	findEmails(bodyG); //sends global body variable to the findEmails() function
+}).then(function() {
+	//Executes once emails and phone numbers have been stored
+	scrapeObj = {"website": domain, //Saves scraped data to an object
+		"URL": "http://www." + domain,
+		"homepageName": homePageTitle,
+		"emails" : finalEmails,
+		"telephone" : finalPhoneNumbers};
+	var json = JSON.stringify(scrapeObj, null, 4); //Convert object to string
+	var domainS = domain.split(".")[0]; // Take away the domain suffix, so domain name can be used as filename
+	fs.writeFile(siteDir + domainS + ".json", json, 'utf8'); // Write json to file domain.json
+	console.dir(scrapeObj, {depth: null, colors: true}) // Display json in console
+}).catch(function(error){ //Catch any errors produced by promises
+	console.log(error); //Log any errors caught
+});
 
 // Function to grab the domain from the email.
 function grabDomain(ie){
@@ -60,10 +97,6 @@ function makeRequest() {
 	});
   });
 }
-
-// RegExp.escape = function(value) {
-// 	return value.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/gi, "\\$&");
-// };
 
 function loadToCheerio(body){
 	return new Promise(function(resolve, reject) {
@@ -158,38 +191,6 @@ function getWords(body){
     knwlInstance.init(body);
     return(knwlInstance.words.get('linkWordsCasesensitive'));
 }
-
-//Checks if user inputted an email address in arguments
-if(process.argv[2] != null) {
-	domain = grabDomain(inputEmail); //Will process the email domain only if an email is given
-}else{
-	console.log("Missing email arguments please refer to README.MD");
-	process.exit(); //Stops the program due to lack of email address in arguments
-}
-
-var body = makeRequest();
-body.then(function(body) {
-	words = getWords(body);
-	bodyG = body;
-  return loadToCheerio(body);
-}).then(function($) {
-  console.log("Page title: " + $('title').text());
-	return findHyperLinks($);
-}).then(function(links){
-	findPhoneNumber(links);
-	findEmails(bodyG);
-  // console.log(finalPhoneNumbers);
-  // console.log(finalEmails);
-}).then(function() {
-	// console.log(finalPhoneNumbers + finalEmails);
-  scrapeObj = {"website": domain, "URL": "http://www." + domain, "emails" : finalEmails, "telephone" : finalPhoneNumbers};
-  var json = JSON.stringify(scrapeObj, null, 4);
-  var domainS = domain.split(".")[0];
-  fs.writeFile(siteDir + domainS + ".json", json, 'utf8');
-  console.dir(scrapeObj, {depth: null, colors: true})
-}).catch(function(error){
-  console.log(error);
-});
 
 
 
