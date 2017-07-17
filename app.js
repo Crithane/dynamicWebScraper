@@ -9,17 +9,17 @@ var request = require('request')
 var fs = require('fs')
 
 // Variables
-var inputEmail = process.argv[2] // Input email is taken from commandline arguments
-var domain
-var knwlInstance = new Knwl('english')
-var siteDir
-var words
-var bodyG //Global body variable
-var finalEmails = [] //Final processed emails
-var finalPhoneNumbers = [] //Final processed phonenumbers
-var scrapeObj = {} //Final object storing scraped data
-var homePageTitle //Title of home page
-var hyperLinks = [] //Array of hyperlinks on the domain
+var inputEmail = process.argv[2]        // Input email is taken from commandline arguments
+var domain                              // Domain take from email address
+var knwlInstance = new Knwl('english')  // Knwl instance for using Knwl functions
+var siteDir                             // Folder directory of the site where data is to be stored
+var words                               // All words on website scraped by Knwl
+var bodyG                               // Global body variable
+var finalEmails = []                    // Final processed emails
+var finalPhoneNumbers = []              // Final processed phonenumbers
+var scrapeObj = {}                      // Final object storing scraped data
+var homePageTitle                       // Title of home page
+var hyperLinks = []                     // Array of hyperlinks on the domain
 
 //Load Knwl plugins
 knwlInstance.register('emails', require('knwl.js/default_plugins/emails'))
