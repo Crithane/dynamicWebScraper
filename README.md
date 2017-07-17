@@ -17,7 +17,7 @@ npm install
 ## Usage example
 
 ```sh
-node app2.js john@canddi.com
+node app.js john@canddi.com
 ```
 
 ## Authors
