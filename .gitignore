@@ -1,6 +1,10 @@
 .idea/**/workspace.xml
+
 .idea/**/tasks.xml
+
 .idea/dictionaries
+
 .idea
 
-scraped sites/*
+
+scraped_sites/*
