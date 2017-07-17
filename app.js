@@ -50,6 +50,7 @@ else {
 /**
  * Main promise chain that steps through in the following order:
  * 1. Makes request to domain - Returns body
+ *     - Creates directory for storing scraped data
  *     - Grabs words from body using Knwl
  * 2. Loads body in to cheerio - returns $ (Cheerio API enabled HTML body)
  * 3. Finds all hyperlinks on page - returns link array
