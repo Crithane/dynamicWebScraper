@@ -1,9 +1,6 @@
 # Dynamic Web Scraper
 > Scrapes a Website that is taken from an inputted emails domain.
 
-[![NPM Version][npm-image]][npm-url]
-[![Build Status][travis-image]][travis-url]
-
 One to two paragraph statement about your product and what it does.
 
 ![](header.png)
