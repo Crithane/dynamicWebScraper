@@ -7,6 +7,9 @@ var cheerio = require('cheerio');
 var http = require('http');
 var request = require('request');
 var fs = require('fs');
+var googleMapsClient = require('@google/maps').createClient({
+    key: 'AIzaSyCxhu3CZLL6FGnXnQrpI3CKJqxJ9SK-XxM'
+});
 
 // Variables
 var inputEmail = process.argv[2];        // Input email is taken from commandline arguments
@@ -20,6 +23,8 @@ var finalPhoneNumbers = [];              // Final processed phonenumbers
 var scrapeObj = {};                      // Final object storing scraped data
 var homePageTitle;                       // Title of home page
 var hyperLinks = [];                     // Array of hyperlinks on the domain
+var address;
+var place;
 
 //Load Knwl plugins
 knwlInstance.register('emails', require('knwl.js/default_plugins/emails'));
@@ -45,7 +50,8 @@ else {
  * 3. Finds all hyperlinks on page - returns link array
  *     - Uses links/$ to find phone numbers and save to array
  *     - Uses links/body to find email addresses and save to array
- * 4. Outputs the scraped data to console and json file in corresponding domain folder
+ * 4. Use Google API to locate the address of the company
+ * 5. Outputs the scraped data to console and json file in corresponding domain folder
  *
  * @type {Promise}
  */
@@ -61,11 +67,14 @@ body.then(function (body) {
     findPhoneNumber(links);
     findEmails(bodyG);
     hyperLinks = links;
+    return findOnGoogleMaps(domain);
+}).then(function (){
 }).then(function () {
     scrapeObj = {
         'website': domain,
         'URL': 'http://www.' + domain,
         'homepageName': homePageTitle,
+        'address': address,
         'emails': finalEmails,
         'telephone': finalPhoneNumbers,
     };
@@ -215,10 +224,7 @@ function findEmails () {
             anyEmails = true;
         }
     });
-    if (anyEmails)
-        return true;
-    else
-        return false;
+    return anyEmails;
 }
 
 /**
@@ -247,4 +253,28 @@ function findHyperLinks ($) {
 function getWords (body) {
     knwlInstance.init(body);
     return (knwlInstance.words.get('linkWordsCasesensitive'));
+}
+
+/**
+ * This function uses the google maps API to find the address of the company
+ * who owns the given domain
+ *
+ * @param domain
+ * @returns {Promise}
+ * @resolve {string} - Formatted address from Google Maps API
+ */
+function findOnGoogleMaps (domain) {
+    return new Promise(function (resolve, reject) {
+        place = googleMapsClient.places({
+            query: domain,
+            language: 'en',
+            location: 'United Kingdom',
+        }, function (err, response) {
+            if (!err) {
+                address = response.json.results[0].formatted_address;
+                resolve(address);
+            }
+        });
+
+    });
 }
