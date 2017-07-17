@@ -1,9 +1,7 @@
 # Dynamic Web Scraper
 > Scrapes a Website that is taken from an inputted emails domain.
 
-One to two paragraph statement about your product and what it does.
-
-![](header.png)
+This project uses ECMAScript 6(2015)
 
 ## Installation
 
@@ -17,7 +15,7 @@ npm install
 ## Usage example
 
 ```sh
-node app2.js john@canddi.com
+node app.js johndoe@example.com
 ```
 
 ## Authors
