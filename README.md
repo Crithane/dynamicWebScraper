@@ -1,6 +1,8 @@
 # Dynamic Web Scraper
 > Scrapes a Website that is taken from an inputted emails domain.
 
+This project uses ECMAScript 6(2015)
+
 ## Installation
 
 Windows & OS X & Linux:
