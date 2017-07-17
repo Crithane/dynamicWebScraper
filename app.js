@@ -29,10 +29,6 @@ var companyName;
 var companyRating;
 var googleMapsResults;
 var googleMapsOpenNow;
-//var googleMapsPhotoReferences = [];
-//var googleMapsPhotoHeight = [];
-//var googleMapsPhotoWidth = [];
-//var googleMapsPhotoDir;
 var googleMapsAPIKey = "AIzaSyCxhu3CZLL6FGnXnQrpI3CKJqxJ9SK-XxM";
 
 //Load Knwl plugins
@@ -195,7 +191,6 @@ function checkDuplicate (entry, array) {
  * @param links
  */
 function findPhoneNumber (links) {
-    // console.log(links);
     links.forEach(function (link) { // Method 1
         if (link.indexOf('tel:') !== -1) {
             link = link.split(':')[1];
@@ -268,8 +263,13 @@ function getWords (body) {
 }
 
 /**
- * This function uses the google maps API to find the address of the company
- * who owns the given domain
+ * This function uses the google maps API to find information about the company
+ * who owns the given domain the following information is pulled from the API:
+ *
+ * Company Name
+ * Formatted address
+ * Company Rating
+ * If they are open or not right now
  *
  * @param domain
  * @returns {Promise}
