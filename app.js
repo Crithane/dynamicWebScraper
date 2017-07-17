@@ -22,6 +22,7 @@ var finalEmails = []; //Final processed emails
 var finalPhoneNumbers = []; //Final processed phonenumbers
 var scrapeObj = {} //Final object storing scraped data
 var homePageTitle; //Title of home page
+var hyperLinks = []; //Array of hyperlinks on the domain
 
 
 //Load Knwl plugins
@@ -49,6 +50,7 @@ body.then(function(body) { // executes first promise returning body (HTML body)
 }).then(function(links){ //Executes findHyperLinks() returning all HREF's as links[]
 	findPhoneNumber(links); //sends links[] to findphonenumber
 	findEmails(bodyG); //sends global body variable to the findEmails() function
+	hyperLinks = links; //Saves links to global variable
 }).then(function() {
 	//Executes once emails and phone numbers have been stored
 	scrapeObj = {"website": domain, //Saves scraped data to an object
@@ -76,13 +78,13 @@ function grabDomain(ie){
 
 function makeRequest() {
 	return new Promise(function(resolve, reject) {
-	request({
+	request({ //Make request to the website
 		"rejectUnauthorized": false,
-		"url": "http://www." + grabDomain(inputEmail),
-		"method": "GET"
+		"url": "http://www." + grabDomain(inputEmail), //Use grabDomain() to get the domain from email
+		"method": "GET" //Use GET method to retrieve site data
 	}, function (error, response, body) {
 		if (!error) {
-			if (response.statusCode === 200) {
+			if (response.statusCode === 200) { //Status code 200 signifies success
 				console.log("StatusCode OK");
 				resolve(body); //Resolves the promise, sending the data back
 			} else {
@@ -106,11 +108,11 @@ function loadToCheerio(body){
 			decodeEntities: true,
 			withDomLvl1: true
 		});
-		resolve($);
+		resolve($); //Returns cheerio variable to promise chain
 	});
 }
 
-function checkDuplicate(entry, array){
+function checkDuplicate(entry, array){ //Checks if a value already exists within an array
 	for (var i = 0; i < array.length; i++) {
 		if (array[i] == entry) {
 			return true;
@@ -119,25 +121,16 @@ function checkDuplicate(entry, array){
 	return false;
 }
 
-function findPostCode(word){
-	if(word.match(postCodeRegex)){
-		console.log("Found a post code " + word);
-	}else {
-    // console.log("no postcode")
-  }
-}
-
-function findPhoneNumber(links){//A method to find phone numbers on websites using tel: hyperlinks
+function findPhoneNumber(links){
 	// console.log(links);
-  links.forEach(function(link){
+  links.forEach(function(link){ //A method to find phone numbers on websites using tel: hyperlinks
 		if(link.indexOf("tel:") !== -1){
-			// var finalLink = link.split("\n")[1].trim();
-			link = link.split(":")[1]
-			link = link.replace(/\s/g, '');
-			if(link.charAt(0) == 0){
-				link = link.replace(link.charAt(0), "+44");
+			link = link.split(":")[1] //Splits string after : to get the phone number
+			link = link.replace(/\s/g, ''); //Removes spaces in phone number
+			if(link.charAt(0) == 0){ //Replaces first 0 with country code
+				link = link.replace(link.charAt(0), "+44"); // UK country code +44
 			}
-			if(link.length > 5) {
+			if(link.length > 5) { //Only pushes to array if phoneumber more than 5 digits
 				// console.log("FINAL PHONENUMBER: " + link);
 				if (!checkDuplicate(link, finalPhoneNumbers)) {
 					finalPhoneNumbers.push(link);
@@ -145,49 +138,45 @@ function findPhoneNumber(links){//A method to find phone numbers on websites usi
 			}
 		}
   });
-  var phones = knwlInstance.get('internationalPhones');
-  // console.log(finalPhoneNumbers);
+  var phones = knwlInstance.get('internationalPhones'); //Uses Knwl to get phone numbers not listed as hyperlinks
   phones.forEach(function(phone){
   	if(phone) {
-		  // console.log("Phone number found " + phone['number']);
-		  if(!checkDuplicate(phone['number'], finalPhoneNumbers)){
-			  finalPhoneNumbers.push(phone['number']);
+		  if(!checkDuplicate(phone['number'], finalPhoneNumbers)){ //Checks if each number is a duplicate
+			  finalPhoneNumbers.push(phone['number']); //Pushes to finalPhoneNumbers array
 		  }
 	  }
   });
 }
 
-function findEmails(){
+function findEmails(){ //Uses Knwl to retrieve emails from the page
   var emails = knwlInstance.get('emails');
-  var anyEmails = false;
-  // var email = emails[0];
+  var anyEmails = false; //Variable to declare if Knwl was able to find any emails or not
   emails.forEach(function(email){
     if(email) {
-    	// console.log("Email found " + email['address']);
-    	if(!checkDuplicate(email['address'], finalEmails)){
-        finalEmails.push(email['address']);
+    	if(!checkDuplicate(email['address'], finalEmails)){ //Checks array for duplicate entries
+        finalEmails.push(email['address']); //If no duplicates, pushes email to array
       }
-      anyEmails = true;
+      anyEmails = true; // Sets emails found variable to true
     }
   });
   if(anyEmails)
-  	return true;
+  	return true; // Returns true if emails were found
   else
-  	return false;
+  	return false; // Returns false if no emails were found
 }
 
-function findHyperLinks($){
+function findHyperLinks($){ //function that grabs all hyperlinks in HREF tags
   return new Promise(function(resolve, reject) {
-    anchors = $('a');
+    anchors = $('a'); //grabs the anchors from cheerio
     links = [];
     $(anchors).each(function(i, anchor){ //For each hyperlink on the website grab the href.
       links.push($(anchor).attr('href'));//Send href to findPhoneNumber()
     });
-    resolve(links);
+    resolve(links); //Returns links found to the promise chain
   });
 }
 
-function getWords(body){
+function getWords(body){ //Uses Knwl to grab all words on the website
     knwlInstance.init(body);
     return(knwlInstance.words.get('linkWordsCasesensitive'));
 }
