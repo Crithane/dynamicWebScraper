@@ -67,11 +67,11 @@ body.then(function(body) { // executes first promise returning body (HTML body)
 // Function to grab the domain from the email.
 function grabDomain(ie){
 	domain = ie.split("@")[1]; //Splits the email at the @ symbol taking the second part of the split as the domain.
-  siteDir = './scraped sites/' + domain + "/";
-  if (!fs.existsSync(siteDir)){
-    fs.mkdirSync(siteDir);
+  siteDir = './scraped sites/' + domain + "/"; //Set directory for individual domains
+  if (!fs.existsSync(siteDir)){ //Check if directory already exists
+    fs.mkdirSync(siteDir); //Make the directory
   }
-	return domain;
+	return domain; //Returns the grabbed domain.
 }
 
 function makeRequest() {
