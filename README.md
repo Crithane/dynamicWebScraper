@@ -1,10 +1,6 @@
 # Dynamic Web Scraper
 > Scrapes a Website that is taken from an inputted emails domain.
 
-One to two paragraph statement about your product and what it does.
-
-![](header.png)
-
 ## Installation
 
 Windows & OS X & Linux:
@@ -17,7 +13,7 @@ npm install
 ## Usage example
 
 ```sh
-node app.js john@canddi.com
+node app.js johndoe@example.com
 ```
 
 ## Authors
