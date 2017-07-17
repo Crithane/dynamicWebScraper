@@ -10,6 +10,7 @@ var fs = require('fs');
 var googleMapsClient = require('@google/maps').createClient({
     key: 'AIzaSyCxhu3CZLL6FGnXnQrpI3CKJqxJ9SK-XxM'
 });
+const download = require('image-downloader');
 
 // Variables
 var inputEmail = process.argv[2];        // Input email is taken from commandline arguments
@@ -25,6 +26,15 @@ var homePageTitle;                       // Title of home page
 var hyperLinks = [];                     // Array of hyperlinks on the domain
 var address;
 var place;
+var companyName;
+var companyRating;
+var googleMapsResults;
+var googleMapsOpenNow;
+//var googleMapsPhotoReferences = [];
+//var googleMapsPhotoHeight = [];
+//var googleMapsPhotoWidth = [];
+//var googleMapsPhotoDir;
+var googleMapsAPIKey = "AIzaSyCxhu3CZLL6FGnXnQrpI3CKJqxJ9SK-XxM";
 
 //Load Knwl plugins
 knwlInstance.register('emails', require('knwl.js/default_plugins/emails'));
@@ -74,6 +84,9 @@ body.then(function (body) {
         'website': domain,
         'URL': 'http://www.' + domain,
         'homepageName': homePageTitle,
+        'companyName': companyName,
+        'companyRating': companyRating.toString(),
+        'openNow': googleMapsOpenNow.toString(),
         'address': address,
         'emails': finalEmails,
         'telephone': finalPhoneNumbers,
@@ -261,7 +274,8 @@ function getWords (body) {
  *
  * @param domain
  * @returns {Promise}
- * @resolve {string} - Formatted address from Google Maps API
+ * @resolve {string} - Resolves formatted address from Google Maps API
+ * @reject {error} - Rejected if an error occurs when accessing Google API
  */
 function findOnGoogleMaps (domain) {
     return new Promise(function (resolve, reject) {
@@ -271,10 +285,18 @@ function findOnGoogleMaps (domain) {
             location: 'United Kingdom',
         }, function (err, response) {
             if (!err) {
+                googleMapsResults = response.json.results[0];
                 address = response.json.results[0].formatted_address;
+                companyName = response.json.results[0].name;
+                companyRating = response.json.results[0].rating;
+                googleMapsOpenNow = response.json.results[0].opening_hours.open_now;
                 resolve(address);
+            }else{
+                console.log(err);
+                reject(err);
             }
         });
 
     });
 }
+

@@ -9,10 +9,11 @@
   "author": "Shane Critchley-Kenyon",
   "license": "ISC",
   "dependencies": {
-    "require": "latest",
-	"cheerio": "cheeriojs/cheerio",
-	"knwl.js": "loadfive/Knwl.js",
-	"request": "request/request",
-    "jquery": "latest"
+    "cheerio": "cheeriojs/cheerio",
+    "image-downloader": "^3.2.2",
+    "jquery": "latest",
+    "knwl.js": "loadfive/Knwl.js",
+    "request": "request/request",
+    "require": "latest"
   }
 }
