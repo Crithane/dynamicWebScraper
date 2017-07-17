@@ -28,13 +28,15 @@ knwlInstance.register('emails', require('knwl.js/default_plugins/emails'))
 knwlInstance.register('internationalPhones', require('knwl.js/experimental_plugins/internationalPhones'))
 knwlInstance.register('places', require('knwl.js/default_plugins/places'))
 
-//Checks if user inputted an email address in arguments
+/**
+ * Uses commandline arguments to grab domain from email
+ */
 if (process.argv[2] != null) {
-    domain = grabDomain(inputEmail) //Will process the email domain only if an email is given
+    domain = grabDomain(inputEmail)
 }
 else {
     console.log('Missing email arguments please refer to README.MD')
-    process.exit() //Stops the program due to lack of email address in arguments
+    process.exit()
 }
 
 /**
@@ -81,7 +83,6 @@ body.then(function (body) { // executes first promise returning body (HTML body)
 }).catch(function (error) { //Catch any errors produced by promises
     console.log(error) //Log any errors caught
 })
-
 
 /**
  * Grabs the domain part of any given email by splitting it at the "@" symbol
