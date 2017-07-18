@@ -4,10 +4,10 @@
 This project uses ECMAScript 6(2015)
 
 ## Screenshots
-# Webapp view
+### Webapp view
 ![](webapp.PNG)
 
-#CLI view
+### CLI view
 ![](cli.PNG)
 
 ## Installation
