@@ -33,7 +33,6 @@ var companyName;                                // Name of company from GoogleMa
 var companyRating;                              // Rating of company from GoogleMaps API
 var googleMapsResults;                          // JSON GoogleMaps API query result
 var googleMapsOpenNow;                          // Asks GoogleMaps API if company is open now, true or false
-var googleMapsAPIKey = "AIzaSyAEtXAF_ouOQWUHTy9YVHwd-AA5bGlK91c";
 var port = '8000';                              // The port that the webserver will run on
 
 //Load Knwl plugins
