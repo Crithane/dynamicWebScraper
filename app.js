@@ -12,23 +12,23 @@ var googleMapsClient = require('@google/maps').createClient({
 });
 
 // Variables
-var inputEmail = process.argv[2];        // Input email is taken from commandline arguments
-var domain;                              // Domain take from email address
-var knwlInstance = new Knwl('english');  // Knwl instance for using Knwl functions
-var siteDir;                             // Folder directory of the site where data is to be stored
-var words;                               // All words on website scraped by Knwl
-var bodyG;                               // Global body variable
-var finalEmails = [];                    // Final processed emails
-var finalPhoneNumbers = [];              // Final processed phonenumbers
-var scrapeObj = {};                      // Final object storing scraped data
-var homePageTitle;                       // Title of home page
-var hyperLinks = [];                     // Array of hyperlinks on the domain
-var address;
-var place;
-var companyName;
-var companyRating;
-var googleMapsResults;
-var googleMapsOpenNow;
+var inputEmail = process.argv[2];               // Input email is taken from commandline arguments
+var domain;                                     // Domain take from email address
+var knwlInstance = new Knwl('english');         // Knwl instance for using Knwl functions
+var siteDir;                                    // Folder directory of the site where data is to be stored
+var words;                                      // All words on website scraped by Knwl
+var bodyG;                                      // Global body variable
+var finalEmails = [];                           // Final processed emails
+var finalPhoneNumbers = [];                     // Final processed phonenumbers
+var scrapeObj = {};                             // Final object storing scraped data
+var homePageTitle;                              // Title of home page
+var hyperLinks = [];                            // Array of hyperlinks on the domain
+var address;                                    // Address of company from GoogleMaps API
+var place;                                      // GoogleMaps API place variable
+var companyName;                                // Name of company from GoogleMaps API
+var companyRating;                              // Rating of company from GoogleMaps API
+var googleMapsResults;                          // JSON GoogleMaps API query result
+var googleMapsOpenNow;                          // Asks GoogleMaps API if company is open now, true or false
 var googleMapsAPIKey = "AIzaSyCxhu3CZLL6FGnXnQrpI3CKJqxJ9SK-XxM";
 
 //Load Knwl plugins
@@ -41,8 +41,7 @@ knwlInstance.register('places', require('knwl.js/default_plugins/places'));
  */
 if (process.argv[2] != null) {
     domain = grabDomain(inputEmail);
-}
-else {
+} else {
     console.log('Missing email arguments please refer to README.MD');
     process.exit();
 }
@@ -75,8 +74,7 @@ body.then(function (body) {
     findEmails(bodyG);
     hyperLinks = links;
     return findOnGoogleMaps(domain);
-}).then(function (){
-}).then(function () {
+}).then(function () {}).then(function () {
     scrapeObj = {
         'website': domain,
         'URL': 'http://www.' + domain,
@@ -96,7 +94,7 @@ body.then(function (body) {
         colors: true,
     });
 }).catch(function (error) {
-//    console.log(error);
+    //    console.log(error);
 
 });
 
@@ -107,7 +105,7 @@ body.then(function (body) {
  * @param ie - Email entered in arguments
  * @returns {*} - Domain
  */
-function grabDomain (ie) {
+function grabDomain(ie) {
     domain = ie.split('@')[1];
     return domain;
 }
@@ -131,7 +129,7 @@ function createDir() {
  * @resolve {variable} - Resolves if body of site is obtained successfully
  * @reject {err} - Rejects promise if error is given
  */
-function makeRequest () {
+function makeRequest() {
     return new Promise(function (resolve, reject) {
         request({
             'rejectUnauthorized': false,
@@ -142,13 +140,11 @@ function makeRequest () {
                 if (response.statusCode === 200) {
                     console.log('StatusCode OK');
                     resolve(body);
-                }
-                else {
+                } else {
                     console.log('Bad response code: ' + response.statusCode);
                     reject(response.statusCode);
                 }
-            }
-            else {
+            } else {
                 console.log(error);
                 console.log('Unable to scrape given domain, exiting program (see error above)');
                 process.exit();
@@ -164,7 +160,7 @@ function makeRequest () {
  * @returns {Promise}
  * @resolve {variable} - Cheerio loaded HTML body
  */
-function loadToCheerio (body) {
+function loadToCheerio(body) {
     return new Promise(function (resolve, reject) {
         var $ = cheerio.load(body, {
             normalizeWhitespace: true,
@@ -183,7 +179,7 @@ function loadToCheerio (body) {
  * @param array - Array to check for duplicate in
  * @returns {boolean} - Returns true if duplicate found
  */
-function checkDuplicate (entry, array) {
+function checkDuplicate(entry, array) {
     for (var i = 0; i < array.length; i++) {
         if (array[i] == entry) {
             return true;
@@ -201,7 +197,7 @@ function checkDuplicate (entry, array) {
  *
  * @param links
  */
-function findPhoneNumber (links) {
+function findPhoneNumber(links) {
     links.forEach(function (link) { // Method 1
         if (link.indexOf('tel:') !== -1) {
             link = link.split(':')[1];
@@ -231,7 +227,7 @@ function findPhoneNumber (links) {
  *
  * @returns {boolean} - True if emails are found, false if not
  */
-function findEmails () {
+function findEmails() {
     var emails = knwlInstance.get('emails');
     var anyEmails = false;
     emails.forEach(function (email) {
@@ -252,7 +248,7 @@ function findEmails () {
  * @returns {Promise}
  * @resolve {array} - Resolves and returns array of hyperlinks
  */
-function findHyperLinks ($) {
+function findHyperLinks($) {
     return new Promise(function (resolve, reject) {
         anchors = $('a'); //Grabs the anchors from cheerio
         links = [];
@@ -268,7 +264,7 @@ function findHyperLinks ($) {
  *
  * @param body - The HTML body returned from the original request
  */
-function getWords (body) {
+function getWords(body) {
     knwlInstance.init(body);
     return (knwlInstance.words.get('linkWordsCasesensitive'));
 }
@@ -287,7 +283,7 @@ function getWords (body) {
  * @resolve {string} - Resolves formatted address from Google Maps API
  * @reject {error} - Rejected if an error occurs when accessing Google API
  */
-function findOnGoogleMaps (domain) {
+function findOnGoogleMaps(domain) {
     return new Promise(function (resolve, reject) {
         place = googleMapsClient.places({
             query: domain,
@@ -301,7 +297,7 @@ function findOnGoogleMaps (domain) {
                 companyRating = response.json.results[0].rating;
                 googleMapsOpenNow = response.json.results[0].opening_hours.open_now;
                 resolve(address);
-            }else{
+            } else {
                 console.log(err);
                 reject(err);
             }
@@ -316,4 +312,3 @@ function findOnGoogleMaps (domain) {
  * - Add code to send data to Node web app using AJAX and JSON
  * - Minor tidying
  */
-
