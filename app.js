@@ -7,8 +7,12 @@ var cheerio = require('cheerio');
 var http = require('http');
 var request = require('request');
 var fs = require('fs');
+// var hb = require('handlebars');
+var express = require('express');
+var app = express();
+var expressHbs = require('express-handlebars');
 var googleMapsClient = require('@google/maps').createClient({
-    key: 'AIzaSyCxhu3CZLL6FGnXnQrpI3CKJqxJ9SK-XxM'
+    key: 'AIzaSyAEtXAF_ouOQWUHTy9YVHwd-AA5bGlK91c'
 });
 
 // Variables
@@ -29,7 +33,8 @@ var companyName;                                // Name of company from GoogleMa
 var companyRating;                              // Rating of company from GoogleMaps API
 var googleMapsResults;                          // JSON GoogleMaps API query result
 var googleMapsOpenNow;                          // Asks GoogleMaps API if company is open now, true or false
-var googleMapsAPIKey = "AIzaSyCxhu3CZLL6FGnXnQrpI3CKJqxJ9SK-XxM";
+var googleMapsAPIKey = "AIzaSyAEtXAF_ouOQWUHTy9YVHwd-AA5bGlK91c";
+var port = '8000';                              // The port that the webserver will run on
 
 //Load Knwl plugins
 knwlInstance.register('emails', require('knwl.js/default_plugins/emails'));
@@ -46,6 +51,11 @@ if (process.argv[2] != null) {
     process.exit();
 }
 
+// Initialize express and start web server
+app.engine('hbs', expressHbs({extname:'hbs', defaultLayout:'main.hbs'}));
+app.set('view engine', 'hbs');
+startWebServer();
+
 /**
  * Main promise chain that steps through in the following order:
  * 1. Makes request to domain - Returns body
@@ -57,6 +67,7 @@ if (process.argv[2] != null) {
  *     - Uses links/body to find email addresses and save to array
  * 4. Use Google API to locate the address of the company
  * 5. Outputs the scraped data to console and json file in corresponding domain folder
+ *     - Updates the webpage hosted on localhost:8000 with the scraped data
  *
  * @type {Promise}
  */
@@ -74,7 +85,8 @@ body.then(function (body) {
     findEmails(bodyG);
     hyperLinks = links;
     return findOnGoogleMaps(domain);
-}).then(function () {}).then(function () {
+}).then(function () {
+}).then(function () {
     scrapeObj = {
         'website': domain,
         'URL': 'http://www.' + domain,
@@ -93,10 +105,31 @@ body.then(function (body) {
         depth: null,
         colors: true,
     });
+    updateWebpage();
+    console.log('Webserver running, results are displayed at http://localhost:' + port
+               + ' press Ctrl+C twice to stop');
 }).catch(function (error) {
     //    console.log(error);
-
 });
+
+/**
+* Starts up the webserver that will display the scraped data on localhost:8000
+*/
+function startWebServer(){
+    app.get('/', function(req, res){
+        res.render('index', scrapeObj);
+    });
+    app.listen(8000);
+}
+
+/**
+ * Updates the webpage after the data has been scraped
+ */
+function updateWebpage(){
+    app.get('/', function(req, res){
+        res.render('index', scrapeObj);
+    });
+}
 
 /**
  * Grabs the domain part of any given email by splitting it at the "@" symbol
@@ -147,7 +180,6 @@ function makeRequest() {
             } else {
                 console.log(error);
                 console.log('Unable to scrape given domain, exiting program (see error above)');
-                process.exit();
             }
         });
     });
@@ -284,6 +316,7 @@ function getWords(body) {
  * @reject {error} - Rejected if an error occurs when accessing Google API
  */
 function findOnGoogleMaps(domain) {
+    console.log(domain);
     return new Promise(function (resolve, reject) {
         place = googleMapsClient.places({
             query: domain,
@@ -292,23 +325,37 @@ function findOnGoogleMaps(domain) {
         }, function (err, response) {
             if (!err) {
                 googleMapsResults = response.json.results[0];
-                address = response.json.results[0].formatted_address;
-                companyName = response.json.results[0].name;
-                companyRating = response.json.results[0].rating;
-                googleMapsOpenNow = response.json.results[0].opening_hours.open_now;
+                if (response.json.results[0].formatted_address) {
+                    address = response.json.results[0].formatted_address;
+                }else{
+                    address = "Not given";
+                }
+                if(response.json.results[0].name) {
+                    companyName = response.json.results[0].name;
+                }else{
+                    companyName = "Not given";
+                }
+                if(response.json.results[0].rating) {
+                    companyRating = response.json.results[0].rating;
+                }else{
+                    companyRating = "Not given";
+                }
+                if(response.json.results[0].opening_hours) {
+                    googleMapsOpenNow = response.json.results[0].opening_hours.open_now;
+                }else{
+                    googleMapsOpenNow = "Not given";
+                }
                 resolve(address);
             } else {
+                console.log(response);;
                 console.log(err);
                 reject(err);
             }
         });
-
     });
 }
 
 /**
  * To-Do list
- * - Add web app code
- * - Add code to send data to Node web app using AJAX and JSON
  * - Minor tidying
  */

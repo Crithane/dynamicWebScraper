@@ -11,6 +11,9 @@
   "dependencies": {
     "@google/maps": "^0.4.2",
     "cheerio": "cheeriojs/cheerio",
+    "express": "^4.15.3",
+    "express-handlebars": "^3.0.0",
+    "handlebars": "^4.0.10",
     "jquery": "latest",
     "knwl.js": "loadfive/Knwl.js",
     "request": "request/request",
