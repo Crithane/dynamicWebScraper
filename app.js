@@ -316,7 +316,6 @@ function getWords(body) {
  * @reject {error} - Rejected if an error occurs when accessing Google API
  */
 function findOnGoogleMaps(domain) {
-    console.log(domain);
     return new Promise(function (resolve, reject) {
         place = googleMapsClient.places({
             query: domain,
