@@ -3,6 +3,14 @@
 
 This project uses ECMAScript 6(2015)
 
+This is a NodeJS project that is designed to get as much data as possible from an email address.
+It will grab the domain from an email address and visit the corresponding website. From the website
+it will scrape phone numbers and email addresses with a fantastic success rate. Then it will use
+GoogleMaps API to find out much more about the company that owns the website. It grabs the address,
+the company name, company GMaps rating and whether or not the company is currently open. All scraped
+data is saved in a json file which is also passed to a HTML5 table within a webapp hosted on localhost:8000,
+to make the data much more readable.
+
 ## Screenshots
 ### Webapp view
 ![](webapp.PNG)
