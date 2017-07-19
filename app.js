@@ -12,7 +12,7 @@ var express = require('express');
 var app = express();
 var expressHbs = require('express-handlebars');
 var googleMapsClient = require('@google/maps').createClient({
-    key: 'AIzaSyAEtXAF_ouOQWUHTy9YVHwd-AA5bGlK91c'
+    key: 'INSERT HERE'
 });
 
 // Variables
