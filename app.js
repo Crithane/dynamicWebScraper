@@ -50,6 +50,7 @@ if (process.argv[2] != null) {
     process.exit();
 }
 
+//hi aaron 2
 // Hi aaron 
 // Initialize express and start web server
 app.engine('hbs', expressHbs({extname:'hbs', defaultLayout:'main.hbs'}));
